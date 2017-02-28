@@ -17,59 +17,22 @@ from community_detection import louvain
 from kernel_eval import svm_classification
 from baseline_kernels import (compute_graphlet_kernel,compute_wl_subtree_kernel)
 
-
-# Load the graph into an undirected NetworkX graph
-
-##################
-# your code here #
-##################
-
-# hint: use read_edgelist function of NetworkX
 G = nx.read_edgelist("../dataset/CA-HepTh.txt", comments='#', delimiter='\t', nodetype=int, create_using=nx.Graph())
 
-
-# Get giant connected component (GCC)
-
-##################
-# your code here #
-##################
-
-# hint: use connected_component_subgraphs function of NetworkX, GCC is the biggest of the subgraphs
+# Get giant connected component
 GCC = max(nx.connected_component_subgraphs(G), key=len)
 
-
-
 # Spectral clustering algorithm
-# Implement and apply spectral clustering
-
 def spectral_clustering(G, k):
+    #L = nx.laplacian_matrix(G).astype(float) # Laplacian
     L = nx.normalized_laplacian_matrix(G).astype(float) # Normalized Laplacian
-
-    # Calculate k smallest in magnitude eigenvalues and corresponding eigenvectors of L
-
-    ##################
-    # your code here #
-    ##################
-    
-    # hint: use eigs function of scipy
-    eigval, eigvec = eigs(L, k=k, which='SR')
-
+    eigval, eigvec = eigs(L,k=k, which="SR") # Calculate eigenvalues and eigenvectors
     eigval = eigval.real # Keep the real part
     eigvec = eigvec.real # Keep the real part
     # sort is implemented by default in increasing order
     idx = eigval.argsort() # Get indices of sorted eigenvalues
     eigvec = eigvec[:,idx] # Sort eigenvectors according to eigenvalues
-    
-    # Perform k-means clustering (store in variable "membership" the clusters to which points belong)
-    
-    ##################
-    # your code here #
-    ##################
-    
-    # hint: use KMeans class of scikit-learn
     km = cluster.KMeans(n_clusters=k, init='random').fit(eigvec)
-
-
     membership = list(km.labels_)
     # will contain node IDs as keys and membership as values
     clustering = {}
@@ -78,8 +41,6 @@ def spectral_clustering(G, k):
         clustering[nodes[i]] = membership[i]
     
     return clustering
-
-
 
 
 def create_dataset(GCC):
@@ -121,6 +82,7 @@ def create_dataset(GCC):
 graphs,labels = create_dataset(GCC)
 
 
+
 # Embed the nodes of all graphs in the d-dimensional
 # space using the eigenvectors of the d largest in
 # magnitude eigenvalues
@@ -130,26 +92,15 @@ def compute_node_embeddings(graphs, d):
 	for G in graphs:
 		n = G.number_of_nodes()
 		A = nx.adjacency_matrix(G).astype(float)
-		
-
-		# Perform eigenvalue decomposition of the adjacency matrix and keep the d largest in magnitude eigenvalues (Store into variable U)
-    
-	    ##################
-	    # your code here #
-	    ##################
-
-	    # hint: use eigs function of scipy
 		if n > d+1:
-			Lambda, U = eigs(A, k=d)
+			Lambda,U = eigs(A, k=d)
 			idx = Lambda.argsort()[::-1]
-			U = U[:, idx]
+			U = U[:,idx]
 		else:
-			Lambda, U = np.linalg.eig(A.todense())
-			idx = Lambda.argsort()[::-1]
-			U = U[:, idx]
+			Lambda,U = np.linalg.eig(A.todense())
+			idx = Lambda.argsort()[::-1]   
+			U = U[:,idx]
 			U = U[:,:d]
-
-
 		U = np.absolute(U);
 		Us.append(U)
 		
@@ -191,19 +142,12 @@ def compute_pm_kernel(graphs, L, d):
 			for p in range(L):
 			    intersec[p] = np.sum(np.minimum(Hs[i][p], Hs[j][p]))
 			
-			
-			# Compute Kij kernel value for graphs i,j using equation 3
-    
-		    ##################
-		    # your code here #
-		    ##################
 			k = k + intersec[L-1]
 			for p in range(L-1):
-				k = k + (1.0/(2**(L-p-1)))*(intersec[p]-intersec[p+1])
+			    k = k + (1.0/(2**(L-p-1)))*(intersec[p]-intersec[p+1])
 
-			K[i, j] = k
-			K[j, i] = K[i, j]
-		    
+			K[i,j] = k
+			K[j,i] = K[i,j]
 	
 	end_time = time.time()
 	print "Total time for Pyramid Match kernel: ", (end_time - start_time)
@@ -236,23 +180,3 @@ print
 K = compute_wl_subtree_kernel(graphs,6)
 result = svm_classification(K,labels)
 print "Accuracy WL: ", result["mean_accuracy"]
-
-""""
-Print result,
-
-Total time for Pyramid Match kernel:  2.23870897293
-Accuracy Pyramid Match:  0.765909090909
-
-Total time for Graphlet kernel:  1.40201497078
-Accuracy Graphlet:  0.651515151515
-
-Number of compressed labels at iteration 0: 6507
-Number of compressed labels at iteration 1: 10981
-Number of compressed labels at iteration 2: 11715
-Number of compressed labels at iteration 3: 11816
-Number of compressed labels at iteration 4: 11837
-Number of compressed labels at iteration 5: 11840
-Total time for WL subtree kernel:  3.36044096947
-Accuracy WL:  0.782575757576
-
-""""
