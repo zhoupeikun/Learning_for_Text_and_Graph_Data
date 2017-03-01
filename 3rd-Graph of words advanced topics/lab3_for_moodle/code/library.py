@@ -1,5 +1,16 @@
+# -*- coding: utf-8 -*-
+import re
+import string
+
+import itertools
+import nltk
+from nltk import pos_tag
+from nltk.corpus import stopwords
+
+
 def clean_text_simple(text, remove_stopwords=True, pos_filtering=True, stemming=True):
-    
+
+    # punctuation set
     punct = string.punctuation.replace('-', '')
     
     # convert to lower case
@@ -34,6 +45,8 @@ def clean_text_simple(text, remove_stopwords=True, pos_filtering=True, stemming=
         stpwds = stopwords.words('english')
         # remove stopwords
         ### fill the gap ###
+        tokens = [token for token in tokens if token not in stpwds]
+    # stemming 词干
     if stemming:
         stemmer = nltk.stem.PorterStemmer()
         # apply Porter's stemmer
