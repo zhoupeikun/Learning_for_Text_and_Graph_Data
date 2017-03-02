@@ -206,3 +206,63 @@ for name, result in results.iteritems():
 
 
 
+"""
+Print Result,
+[nltk_data] Downloading package maxent_treebank_pos_tagger to
+[nltk_data]     /Users/peikun/nltk_data...
+[nltk_data]   Package maxent_treebank_pos_tagger is already up-to-
+[nltk_data]       date!
+[nltk_data] Downloading package stopwords to
+[nltk_data]     /Users/peikun/nltk_data...
+[nltk_data]   Package stopwords is already up-to-date!
+100 files processed
+200 files processed
+300 files processed
+400 files processed
+500 files processed
+100 abstracts processed
+200 abstracts processed
+300 abstracts processed
+400 abstracts processed
+500 abstracts processed
+100 files processed
+200 files processed
+300 files processed
+400 files processed
+500 files processed
+100 abstracts processed
+200 abstracts processed
+300 abstracts processed
+400 abstracts processed
+500 abstracts processed
+100 vectors processed
+200 vectors processed
+300 vectors processed
+400 vectors processed
+500 vectors processed
+100 abstracts processed
+200 abstracts processed
+300 abstracts processed
+400 abstracts processed
+500 abstracts processed
+tfidf performance:
+
+precision: 0.58550064
+recall: 0.39335518
+F-1 score: 0.45282048
+
+
+pr performance:
+
+precision: 0.5222796
+recall: 0.50610968
+F-1 score: 0.49195082
+
+
+gow performance:
+
+precision: 0.51860822
+recall: 0.62555202
+F-1 score: 0.5154552
+
+"""
