@@ -13,8 +13,8 @@ from nltk import pos_tag
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # might also be required:
-# nltk.download('maxent_treebank_pos_tagger')
-# nltk.download('stopwords')
+nltk.download('maxent_treebank_pos_tagger')
+nltk.download('stopwords')
 
 from library import clean_text_simple, terms_to_graph, accuracy_metrics
 
@@ -25,7 +25,7 @@ stpwds = stopwords.words('english')
 # read and pre-process abstracts #
 ##################################
 
-path_to_abstracts = # fill me (absolute path)
+path_to_abstracts = "../data/Hulth2003testing/abstracts/"
 abstract_names = sorted(os.listdir(path_to_abstracts))
 
 abstracts = []
@@ -33,7 +33,7 @@ counter = 0
 
 for filename in abstract_names:
     # read file
-    with open(path_to_abstracts + '\\' + filename, 'r') as my_file: 
+    with open(path_to_abstracts + '/' + filename, 'r') as my_file:
         text = my_file.read().splitlines()
     text = ' '.join(text)
     # remove formatting
@@ -59,7 +59,7 @@ for abstract in abstracts:
 # read and pre-process keywords #
 #################################
 
-path_to_keywords = # fill me (absolute path)
+path_to_keywords = "../data/Hulth2003testing/uncontr/"
 keywords_names = sorted(os.listdir(path_to_keywords))
    
 keywords_gold_standard = []
@@ -67,7 +67,7 @@ counter = 0
 
 for filename in keywords_names:
     # read file
-    with open(path_to_keywords + '\\' + filename, 'r') as my_file: 
+    with open(path_to_keywords + '/' + filename, 'r') as my_file:
         text = my_file.read().splitlines()
     text = ' '.join(text)
     # remove formatting
@@ -128,6 +128,8 @@ tfidf_vectorizer = TfidfVectorizer(stop_words = stpwds)
 doc_term_matrix = tfidf_vectorizer.fit_transform(abstracts_cleaned_strings)
 ### fill the gap (create an object 'terms' containing the column names of 'doc_term_matrix') ###
 ### you can use the .get_feature_names() method ###
+terms = tfidf_vectorizer.get_feature_names()
+
 vectors_list = doc_term_matrix.todense().tolist()
 
 keywords_tfidf = []
@@ -138,7 +140,7 @@ for vector in vectors_list:
     # bow feature vector as list of tuples
     terms_weights = zip(terms,vector)
     # keep only non zero values (the words in the document)
-    ### fill the gap (create object 'nonzero') ###
+    nonzero = [tuple for tuple in terms_weights if tuple[1] != 0]
     # rank by decreasing weights
     nonzero = sorted(nonzero, key=operator.itemgetter(1), reverse=True)
     # retain top 33% words as keywords
@@ -160,6 +162,21 @@ for abstract in abstracts_cleaned:
     ### fill the gaps ###
 	### hint: combine the beginning of the gow loop with the middle section of the tfidf loop ###
 	### use the .pagerank() igraph method ###
+    g = terms_to_graph(abstract, w=4)
+    # compute pagerank scores
+    pr_scores = zip(g.vs['name'], g.pagerank())
+    # rank in decreasing order
+    pr_scores = sorted(pr_scores, cmp=None, key=operator.itemgetter(1), reverse=True)
+
+    # retain 33% of the words as keywords (randomly selected without replacement)
+    numb_to_retain = int(round(len(abstract) / 3))
+    keywords = [tuple[0] for tuple in pr_scores[:numb_to_retain]]
+
+    keywords_pr.append(keywords)
+
+    counter += 1
+    if counter % 100 == 0:
+        print counter, 'abstracts processed'
 
 ##########################
 # performance evaluation #
@@ -186,3 +203,6 @@ for name, result in results.iteritems():
     print 'recall:', sum([tuple[1] for tuple in result])/lkgs
     print 'F-1 score:', sum([tuple[2] for tuple in result])/lkgs
     print '\n'
+
+
+

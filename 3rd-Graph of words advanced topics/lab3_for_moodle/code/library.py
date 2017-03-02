@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-import re
 import string
-
+import re
 import itertools
+import copy
+import igraph
 import nltk
-from nltk import pos_tag
+
 from nltk.corpus import stopwords
+# requires nltk 3.2.1
+from nltk import pos_tag
 
 
 def clean_text_simple(text, remove_stopwords=True, pos_filtering=True, stemming=True):
@@ -22,7 +25,7 @@ def clean_text_simple(text, remove_stopwords=True, pos_filtering=True, stemming=
     # strip leading and trailing white space
     text = text.strip()
     # tokenize (split based on whitespace)
-    ### fill the gap ###
+    tokens = text.split(" ")
     if pos_filtering == True:
         # apply POS-tagging
         tagged_tokens = pos_tag(tokens)
@@ -98,10 +101,14 @@ def terms_to_graph(terms, w):
             
                 # if edge has already been seen, update its weight
                 ### fill the gap ###
+                if try_edge in from_to:
+                    from_to[try_edge] += 1
+
                                    
                 # if edge has never been seen, create it and assign it a unit weight     
                 else:
                     ### fill the gap ###
+                    from_to[try_edge] = 1
     
     # create empty graph
     g = igraph.Graph(directed=True)
@@ -131,7 +138,12 @@ def unweighted_k_core(g):
     # while there are vertices remaining in the graph
     while len(gg.vs)>0:
         ### fill the gaps ###
-            
+        # while there is a vertex with degree less than 1
+        while [deg for deg in gg.strength() if deg <= 1]:
+            index = [ind for ind, deg in enumerate(gg.strength()) if deg <= 1][0]
+            # assign i to the vertices core numbers
+            cores_g[gg.vs[index]['name']] = i
+            gg.delete_vertices(index)
         i += 1
     
     return cores_g
@@ -147,12 +159,14 @@ def accuracy_metrics(candidate, truth):
     
     # false negatives ('misses') are in truth but not in candidate
     ### fill the gap ###
+    fn = len([element for element in truth if element not in candidate])
 
     # precision
     prec = round(float(tp)/(tp+fp),5)
     
     # recall
     ### fill the gap ###
+    rec = round(float(tp)/(tp+fn), 5)
     
     if prec+rec != 0:
         # F1 score
