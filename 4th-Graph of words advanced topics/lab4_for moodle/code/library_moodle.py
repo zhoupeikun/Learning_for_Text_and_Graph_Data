@@ -32,7 +32,6 @@ def terms_to_graph(terms, w):
         considered_term = terms[i]
         # all terms within sliding window
         terms_temp = terms[(i-w+1):(i+1)]
-
         # edges to try
         candidate_edges = []
         for p in xrange(w-1):
@@ -46,6 +45,7 @@ def terms_to_graph(terms, w):
                 # if edge has already been seen, update its weight
                 if try_edge in from_to:
                     #### your code here ####
+                    from_to[try_edge] +=1
 
                 # if edge has never been seen, create it and assign it a unit weight
                 else:
@@ -71,13 +71,9 @@ def compute_node_centrality(graph):
     degrees = graph.degree()
     degrees = [round(float(degree)/(len(graph.vs)-1),5) for degree in degrees]
 
-    # weighted degree - you can use igraph strength method (remember to use the weights argument) 
-    # store the results as 'w_degrees'
-    ###################
-    #                 #
-    # YOUR CODE HERE  #
-    #                 #
-    ###################
+    # weighted degree
+    w_degrees = graph.strength(weights=graph.es["weight"])
+    w_degrees = [round(float(degree)/(len(graph.vs)-1),5) for degree in w_degrees]
 
     # closeness
     closeness = graph.closeness(normalized=True)
@@ -89,11 +85,16 @@ def compute_node_centrality(graph):
 
     return(zip(graph.vs["name"],degrees,w_degrees,closeness,w_closeness))
 
-
 def print_top10(feature_names, clf, class_labels):
     """Prints features with the highest coefficient values, per class"""
-    ###################
-    #                 #
-    # YOUR CODE HERE  #
-    #                 #
-    ###################
+	# coef stores the weights of each feature (in unique term), for each class
+    for i, class_label in enumerate(class_labels):
+        top10 = np.argsort(clf.coef_[i])[-10:]
+        print("%s: %s" % (class_label," ".join(feature_names[j] for j in top10)))
+        
+
+def print_bot10(feature_names, clf, class_labels):
+    """Prints features with the lowest coefficient values, per class"""
+    for i, class_label in enumerate(class_labels):
+        bot10 = np.argsort(clf.coef_[i])[0:9]
+        print("%s: %s" % (class_label," ".join(feature_names[j] for j in bot10)))
