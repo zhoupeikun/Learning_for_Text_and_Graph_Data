@@ -1,5 +1,7 @@
 # Learning_for_Text_and_Graph_Data
 
+Also named #Graph Mining and Analysis with Python#
+
 Advanced machine learning and combinatorial methods for large scale text and graph data
 
 The course is a part of the Master Data Science in Ecole Polytechnique
